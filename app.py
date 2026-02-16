@@ -4,18 +4,15 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# ==============================
-# PAGE CONFIG
-# ==============================
 st.set_page_config(
     page_title="Vehicle Maintenance Prediction",
-    layout="wide"
+    layout="centered"
 )
 
-st.title("🚗 Vehicle Maintenance Prediction System")
+st.title("Vehicle Maintenance Prediction System")
 st.write(
-    "Predict maintenance risk and estimate time-to-failure using "
-    "vehicle telemetry and usage data (Classical ML)."
+    "Enter vehicle telemetry and usage parameters to predict "
+    "maintenance risk and estimated time-to-failure."
 )
 
 # ==============================
@@ -23,103 +20,75 @@ st.write(
 # ==============================
 @st.cache_resource
 def load_models():
-    logistic_model = joblib.load("logistic_model.pkl")
-    tree_model = joblib.load("decision_tree_model.pkl")
-    regression_model = joblib.load("regression_model.pkl")
-    return logistic_model, tree_model, regression_model
+    return (
+        joblib.load("logistic_model.pkl"),
+        joblib.load("decision_tree_model.pkl"),
+        joblib.load("regression_model.pkl")
+    )
 
 logistic_model, tree_model, regression_model = load_models()
 
 # ==============================
-# FILE UPLOAD
+# USER INPUT FORM
 # ==============================
-st.subheader("📤 Upload Vehicle Telemetry CSV")
+st.subheader(" Enter Vehicle Parameters")
 
-uploaded_file = st.file_uploader(
-    "Upload a CSV file (same format as cleaned_vehicle_data.csv)",
-    type=["csv"]
-)
+with st.form("vehicle_form"):
+    engine_hours = st.number_input("Engine Hours", min_value=0.0)
+    avg_engine_rpm = st.number_input("Average Engine RPM", min_value=0.0)
+    engine_load_nm = st.number_input("Engine Load (Nm)", min_value=0.0)
+    engine_temp_c = st.number_input("Engine Temperature (°C)")
+    ambient_temp_c = st.number_input("Ambient Temperature (°C)")
+    fault_code_count = st.number_input("Fault Code Count", min_value=0)
+    mileage_km = st.number_input("Mileage (km)", min_value=0.0)
+    usage_intensity = st.number_input("Usage Intensity", min_value=0.0)
 
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
+    vehicle_usage_type = st.selectbox(
+        "Vehicle Usage Type",
+        ["L", "M", "H"]
+    )
 
-    st.subheader("🔍 Data Preview")
-    st.dataframe(data.head())
+    vehicle_model = st.selectbox(
+        "Vehicle Model",
+        ["M14860", "L47181", "H29424"]
+    )
 
-    # ==============================
-    # FEATURE SELECTION
-    # ==============================
-    FEATURE_COLUMNS = [
-        'engine_hours',
-        'avg_engine_rpm',
-        'engine_load_nm',
-        'engine_temp_c',
-        'ambient_temp_c',
-        'fault_code_count',
-        'mileage_km',
-        'usage_intensity',
-        'vehicle_usage_type',
-        'vehicle_model'
-    ]
+    submit = st.form_submit_button("🔮 Predict Maintenance Risk")
 
-    if not all(col in data.columns for col in FEATURE_COLUMNS):
-        st.error("Uploaded CSV does not contain required columns.")
-    else:
-        X = data[FEATURE_COLUMNS]
+# ==============================
+# PREDICTION
+# ==============================
+if submit:
+    input_df = pd.DataFrame([{
+        "engine_hours": engine_hours,
+        "avg_engine_rpm": avg_engine_rpm,
+        "engine_load_nm": engine_load_nm,
+        "engine_temp_c": engine_temp_c,
+        "ambient_temp_c": ambient_temp_c,
+        "fault_code_count": fault_code_count,
+        "mileage_km": mileage_km,
+        "usage_intensity": usage_intensity,
+        "vehicle_usage_type": vehicle_usage_type,
+        "vehicle_model": vehicle_model
+    }])
 
-        # ==============================
-        # PREDICTION BUTTON
-        # ==============================
-        if st.button("🔮 Predict Maintenance Risk"):
-            # Classification predictions
-            data["maintenance_risk_lr"] = logistic_model.predict(X)
-            data["maintenance_risk_dt"] = tree_model.predict(X)
+    risk = logistic_model.predict(input_df)[0]
+    probability = logistic_model.predict_proba(input_df)[0][1]
+    days_to_failure = regression_model.predict(input_df)[0]
 
-            # Probability from Logistic Regression
-            data["risk_probability"] = logistic_model.predict_proba(X)[:, 1]
+    st.subheader(" Prediction Result")
 
-            # Regression prediction
-            data["predicted_days_to_failure"] = regression_model.predict(X)
+    st.metric(
+        "Maintenance Risk",
+        "High Risk" if risk == 1 else "Low Risk"
+    )
 
-            # Risk label
-            data["risk_label"] = data["maintenance_risk_lr"].map(
-                {0: "Low Risk", 1: "High Risk"}
-            )
+    st.metric(
+        "Risk Probability",
+        f"{probability:.3f}"
+    )
 
-            st.subheader("📊 Prediction Results")
-            st.dataframe(
-                data[
-                    [
-                        "risk_label",
-                        "risk_probability",
-                        "predicted_days_to_failure"
-                    ]
-                ].head(20)
-            )
-
-            # ==============================
-            # SUMMARY METRICS
-            # ==============================
-            high_risk_count = (data["maintenance_risk_lr"] == 1).sum()
-            total = len(data)
-
-            st.subheader("📈 Fleet Summary")
-            col1, col2 = st.columns(2)
-            col1.metric("Total Vehicles", total)
-            col2.metric("High-Risk Vehicles", high_risk_count)
-
-            # ==============================
-            # DOWNLOAD RESULTS
-            # ==============================
-            st.subheader("⬇️ Download Predictions")
-
-            csv = data.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="Download Prediction CSV",
-                data=csv,
-                file_name="maintenance_predictions.csv",
-                mime="text/csv"
-            )
-
-else:
-    st.info("Please upload a CSV file to begin.")
+    st.metric(
+        "Predicted Days to Failure",
+        f"{days_to_failure:.1f} days"
+    )
