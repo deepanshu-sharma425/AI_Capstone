@@ -92,3 +92,12 @@ if submit:
         "Predicted Days to Failure",
         f"{days_to_failure:.1f} days"
     )
+
+# git add .
+# 
+
+# git push origin main
+
+
+
+hrishabha
