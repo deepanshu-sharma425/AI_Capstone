@@ -11,7 +11,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🚗 Vehicle Maintenance Prediction System")
+st.title(" Vehicle Maintenance Prediction System")
 st.write(
     "Enter vehicle usage and sensor parameters to predict **maintenance risk** "
     "and **estimated time-to-failure** using classical machine learning."
@@ -32,7 +32,7 @@ logistic_model, tree_model, regression_model = load_models()
 # ==============================
 # USER INPUT FORM
 # ==============================
-st.subheader("🛠 Enter Vehicle Parameters")
+st.subheader(" Enter Vehicle Parameters")
 
 with st.form("vehicle_input_form"):
 
