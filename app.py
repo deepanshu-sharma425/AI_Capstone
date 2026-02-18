@@ -74,7 +74,8 @@ if submit:
 
     risk = logistic_model.predict(input_df)[0]
     probability = logistic_model.predict_proba(input_df)[0][1]
-    days_to_failure = regression_model.predict(input_df)[0]
+    days_to_failure = max(0, regression_model.predict(input_df)[0])
+
 
     st.subheader(" Prediction Result")
 
@@ -93,8 +94,4 @@ if submit:
         f"{days_to_failure:.1f} days"
     )
 
-# git add .
-# 
-
-# git push origin main
 
