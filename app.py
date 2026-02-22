@@ -141,6 +141,6 @@ if submit:
 # ==============================
 st.markdown("---")
 st.caption(
-    "Milestone-1 | Classical Machine Learning | "
-    "Logistic Regression & Decision Tree | No LLMs | No Agentic AI"
+    "Milestone-1 "
+   
 )
