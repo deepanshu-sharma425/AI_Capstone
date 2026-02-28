@@ -100,18 +100,27 @@ EDA notebooks are included in the `notebooks/` directory.
 ## 🗂️ Repository Structure  
 VehicleCare360/
 ├── data/
-│ ├── raw/ # Original dataset
-│ └── processed/ # Cleaned & encoded data
-├── models/ # Trained models and scaler
-│ ├── logistic_model.pkl
-│ ├── decision_tree_model.pkl
-│ └── scaler.pkl
-├── notebooks/
-│ ├── DataCleaning.ipynb
-│ └── ModelTraining.ipynb
+│   ├── raw/                     # Original AI4I 2020 dataset
+│   │   └── ai4i2020.csv
+│   └── processed/               # Cleaned & feature-engineered data
+│       └── cleaned_ai4i_data.csv
+│
+├── models/                      # Trained ML models & preprocessing artifacts
+│   ├── logistic_model.pkl
+│   ├── decision_tree_model.pkl
+│   └── scaler.pkl
+│
+├── notebooks/                   # Research & experimentation notebooks
+│   ├── Data_Cleaning.ipynb      # Data preprocessing & EDA
+│   └── Model_Training.ipynb     # Model training & evaluation
+│
+├── docs/                        # Documentation & evaluation artifacts
+│   ├── 
+│   ├── confusion_matrix_decision_tree.png
+│   └── feature_importance_decision_tree.png
+│
 ├── src/
-│ ├── app.py # Streamlit application
-│ ├── agent_logic.py # LangGraph workflows (Phase 2)
-│ └── utils.py # Preprocessing helpers
-├── requirements.txt
-└── README.md
+│   └── app.py                   # Streamlit application (prediction UI)
+│
+├── requirements.txt             # Python dependencies
+└── README.md                    # Project documentation
