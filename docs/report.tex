@@ -1,0 +1,151 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---------------- Packages ----------------
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{titlesec}
+
+\geometry{margin=1in}
+\onehalfspacing
+
+% ---------------- Title Formatting ----------------
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% ---------------- Document ----------------
+\begin{document}
+
+% ---------------- Title Page ----------------
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\LARGE \textbf{VehicleCare360}}\\[0.5cm]
+    {\large AI-Based Predictive Maintenance System}\\[1.5cm]
+
+    \textbf{Course Name:} Artificial Intelligence / Machine Learning\\
+    \textbf{Project Type:} Mini Project / Capstone Project\\[1cm]
+
+    \textbf{Team Members:}\\
+    Member 1 – Data Preprocessing \& EDA\\
+    Member 2 – Model Development \& Evaluation\\
+    Member 3 – Application Development\\
+    Member 4 – Documentation \& Integration\\[1.5cm]
+
+    \textbf{Institution Name}\\
+    \textbf{Department Name}\\
+    \textbf{Academic Year:} 2025–2026
+
+    \vfill
+\end{titlepage}
+
+% ---------------- Abstract ----------------
+\section*{Abstract}
+VehicleCare360 is a machine learning–based predictive maintenance system designed to assess machine failure risk using sensor and operational data. The project applies supervised learning models to analyze temperature, rotational speed, torque, and tool wear parameters in order to predict potential machine failures. A web-based interface developed using Streamlit enables real-time risk prediction and visualization. This project demonstrates an end-to-end machine learning workflow including data preprocessing, model training, evaluation, and deployment.
+
+% ---------------- Introduction ----------------
+\section{Introduction}
+Predictive maintenance plays a critical role in modern industrial systems by reducing unexpected equipment failures and minimizing operational downtime. Traditional maintenance approaches are often reactive or schedule-based, which may fail to identify early signs of machine degradation. This project aims to address this challenge by leveraging machine learning techniques to predict machine failure risk in advance.
+
+VehicleCare360 provides an interactive platform that allows users to input real-time machine parameters and receive failure risk predictions, thereby supporting proactive maintenance decisions.
+
+% ---------------- Dataset Description ----------------
+\section{Dataset Description}
+The project uses the \textbf{AI4I 2020 Predictive Maintenance Dataset}, which contains sensor data representing industrial machine operating conditions.
+
+\subsection{Features}
+\begin{itemize}
+    \item Air temperature (K)
+    \item Process temperature (K)
+    \item Rotational speed (RPM)
+    \item Torque (Nm)
+    \item Tool wear (minutes)
+    \item Product type (categorical)
+\end{itemize}
+
+\subsection{Target Variable}
+\begin{itemize}
+    \item Machine failure (Binary: 0 – No Failure, 1 – Failure)
+\end{itemize}
+
+% ---------------- Data Preprocessing ----------------
+\section{Data Preprocessing}
+Data preprocessing was performed to improve data quality and model performance. The following steps were applied:
+
+\begin{itemize}
+    \item Removal of non-informative identifiers
+    \item Handling missing values
+    \item Feature scaling using StandardScaler
+    \item One-hot encoding of categorical features
+\end{itemize}
+
+To avoid multicollinearity, k-1 encoding was used for the product type feature.
+
+% ---------------- Model Development ----------------
+\section{Model Development}
+Two supervised learning models were trained and evaluated:
+
+\subsection{Logistic Regression}
+Logistic Regression was selected for its simplicity and ability to provide probabilistic outputs, which are useful for risk estimation.
+
+\subsection{Decision Tree Classifier}
+The Decision Tree model was used to capture non-linear relationships and to provide interpretability through feature importance.
+
+% ---------------- Model Evaluation ----------------
+\section{Model Evaluation}
+Model performance was evaluated using the following metrics:
+
+\begin{itemize}
+    \item Confusion Matrix
+    \item Precision
+    \item Recall
+    \item F1-Score
+\end{itemize}
+
+Decision Tree results provided better interpretability, while Logistic Regression produced smoother probability estimates.
+
+% ---------------- Application Deployment ----------------
+\section{Application Deployment}
+A web-based user interface was developed using \textbf{Streamlit}. The application allows users to:
+
+\begin{itemize}
+    \item Input machine parameters using sliders
+    \item Select the prediction model
+    \item View failure risk and probability
+    \item Receive maintenance recommendations
+\end{itemize}
+
+The application integrates trained models and preprocessing components to enable real-time inference.
+
+% ---------------- Results and Insights ----------------
+\section{Results and Insights}
+Analysis of feature importance revealed that torque, rotational speed, and tool wear are key contributors to machine failure. These findings align with real-world mechanical system behavior, validating the effectiveness of the models.
+
+% ---------------- Conclusion ----------------
+\section{Conclusion}
+VehicleCare360 successfully demonstrates an end-to-end machine learning pipeline for predictive maintenance. The system effectively combines data preprocessing, model training, evaluation, and deployment into a single application. This project serves as an educational example of applying machine learning techniques to real-world industrial problems.
+
+% ---------------- Future Work ----------------
+\section{Future Work}
+Future enhancements may include:
+\begin{itemize}
+    \item Integration of real-time sensor data
+    \item Deployment on cloud platforms
+    \item Incorporation of additional machine learning models
+    \item Automated maintenance alert systems
+\end{itemize}
+
+% ---------------- References ----------------
+\section*{References}
+\begin{enumerate}
+    \item AI4I 2020 Predictive Maintenance Dataset, UCI Machine Learning Repository
+    \item Scikit-learn Documentation
+    \item Streamlit Documentation
+\end{enumerate}
+
+\end{document}
