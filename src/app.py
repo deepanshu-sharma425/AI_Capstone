@@ -1,154 +1,88 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
 # -------------------------------------------------
 # Page Config
 # -------------------------------------------------
 st.set_page_config(
     page_title="VehicleCare360",
-    page_icon="🚗",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
 # -------------------------------------------------
-# Dark Theme CSS
+# Dark UI Styling
 # -------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
-* {
-    font-family: 'Inter', sans-serif;
-}
-
 .stApp {
-    background-color: #0f172a;
+    background: linear-gradient(180deg, #020617, #020617);
     color: #e5e7eb;
 }
-
-.main .block-container {
-    padding: 3rem 4rem;
-    max-width: 1200px;
-}
-
-/* Header */
-.header {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-
 .main-title {
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: #f9fafb;
-    margin: 0;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #e5e7eb;
+    text-align: center;
 }
-
 .subtitle {
-    font-size: 0.95rem;
-    color: #9ca3af;
-    margin-top: 0.5rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 2rem;
 }
-
-/* Section titles */
 .section-title {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #93c5fd;
-    margin-bottom: 1.2rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    margin-bottom: 1rem;
 }
-
-/* Inputs */
-input, select {
-    background-color: #020617 !important;
-    color: #f9fafb !important;
-    border: 1px solid #334155 !important;
-    border-radius: 6px !important;
-}
-
-/* Buttons */
-.stButton > button {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+.stButton>button {
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
     color: white;
-    font-weight: 500;
     border: none;
-    padding: 0.75rem 2rem;
     border-radius: 8px;
-    font-size: 0.95rem;
+    padding: 0.75rem;
+    font-size: 1rem;
     width: 100%;
 }
-
-/* Result cards */
-.result {
-    border-radius: 10px;
-    padding: 2rem;
-    margin-top: 2rem;
+.stButton>button:hover {
+    background: linear-gradient(90deg, #1d4ed8, #1e40af);
 }
-
-.risk-low {
-    background-color: #022c22;
-    border-left: 5px solid #10b981;
-}
-
-.risk-high {
-    background-color: #3f1d1d;
-    border-left: 5px solid #ef4444;
-}
-
-.result-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: #f9fafb;
-}
-
-.result-text {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #d1d5db;
-}
-
-/* Footer */
-.footer {
-    text-align: center;
-    color: #6b7280;
-    font-size: 0.8rem;
-    margin-top: 4rem;
+input, select {
+    background-color: #020617 !important;
+    color: #e5e7eb !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# Header
+# Title
 # -------------------------------------------------
-st.markdown("""
-<div class="header">
-    <h1 class="main-title">VehicleCare360</h1>
-    <p class="subtitle">AI-Powered Predictive Vehicle Maintenance System</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>VehicleCare360</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='subtitle'>AI-Powered Predictive Vehicle Maintenance System</div>",
+    unsafe_allow_html=True
+)
 
 # -------------------------------------------------
 # Load Models
 # -------------------------------------------------
+MODEL_DIR = "models"
+
 @st.cache_resource
-def load_assets():
-    try:
-        scaler = joblib.load("models/scaler.pkl")
-        lr_model = joblib.load("models/logistic_model.pkl")
-        dt_model = joblib.load("models/decision_tree_model.pkl")
-        return scaler, lr_model, dt_model
-    except Exception as e:
-        st.error(f"Model loading failed: {e}")
-        return None, None, None
+def load_models():
+    lr = joblib.load(os.path.join(MODEL_DIR, "logistic_model.pkl"))
+    dt = joblib.load(os.path.join(MODEL_DIR, "decision_tree_model.pkl"))
+    scaler = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
+    return lr, dt, scaler
 
-scaler, lr_model, dt_model = load_assets()
-
-if scaler is None:
+try:
+    lr_model, dt_model, scaler = load_models()
+except Exception as e:
+    st.error(f"Model loading failed: {e}")
     st.stop()
 
 # -------------------------------------------------
@@ -159,35 +93,63 @@ model_choice = st.selectbox(
     ["Logistic Regression", "Decision Tree"]
 )
 
-# -------------------------------------------------
-# Input Sections
-# -------------------------------------------------
-col1, col2, col3 = st.columns(3, gap="large")
+model = lr_model if model_choice == "Logistic Regression" else dt_model
 
+# -------------------------------------------------
+# Input Layout
+# -------------------------------------------------
+col1, col2, col3 = st.columns(3)
+
+# ---------- Temperature ----------
 with col1:
-    st.markdown('<p class="section-title">Temperature</p>', unsafe_allow_html=True)
-    air_temp = st.number_input("Air Temperature (K)", 250.0, 400.0, 300.0)
-    process_temp = st.number_input("Process Temperature (K)", 250.0, 400.0, 310.0)
+    st.markdown("<div class='section-title'>Temperature</div>", unsafe_allow_html=True)
 
+    air_temp = st.slider(
+        "Air Temperature (K)", 250.0, 350.0, 300.0, 1.0
+    )
+
+    process_temp = st.slider(
+        "Process Temperature (K)", 250.0, 350.0, 310.0, 1.0
+    )
+
+# ---------- Mechanical ----------
 with col2:
-    st.markdown('<p class="section-title">Mechanical</p>', unsafe_allow_html=True)
-    rpm = st.number_input("Rotational Speed (rpm)", 0.0, 3000.0, 1500.0)
-    torque = st.number_input("Torque (Nm)", 0.0, 100.0, 40.0)
-    tool_wear = st.number_input("Tool Wear (min)", 0.0, 300.0, 100.0)
+    st.markdown("<div class='section-title'>Mechanical</div>", unsafe_allow_html=True)
 
+    rpm = st.slider(
+        "Rotational Speed (RPM)", 500, 3000, 1500, 50
+    )
+
+    torque = st.slider(
+        "Torque (Nm)", 10.0, 100.0, 40.0, 1.0
+    )
+
+    tool_wear = st.slider(
+        "Tool Wear (min)", 0.0, 300.0, 100.0, 5.0
+    )
+
+# ---------- Product ----------
 with col3:
-    st.markdown('<p class="section-title">Product</p>', unsafe_allow_html=True)
-    product_type = st.selectbox("Product Type", ["L", "M", "H"])
+    st.markdown("<div class='section-title'>Product</div>", unsafe_allow_html=True)
+
+    product_label = st.selectbox(
+        "Product Type",
+        ["Light", "Medium", "Heavy"]
+    )
+
+# -------------------------------------------------
+# Correct One-Hot Encoding (NO Type_H)
+# -------------------------------------------------
+type_L = 1 if product_label == "Light" else 0
+type_M = 1 if product_label == "Medium" else 0
+# Heavy = both 0 (implicit)
 
 # -------------------------------------------------
 # Prediction
 # -------------------------------------------------
-if st.button("Analyze Maintenance Risk", use_container_width=True):
+st.markdown("<br>", unsafe_allow_html=True)
 
-    # Encode product type (drop_first logic)
-    type_L = 1 if product_type == "L" else 0
-    type_M = 1 if product_type == "M" else 0
-
+if st.button("Analyze Maintenance Risk"):
     input_df = pd.DataFrame({
         "Air temperature [K]": [air_temp],
         "Process temperature [K]": [process_temp],
@@ -208,41 +170,41 @@ if st.button("Analyze Maintenance Risk", use_container_width=True):
 
     input_df[num_cols] = scaler.transform(input_df[num_cols])
 
-    model = lr_model if model_choice == "Logistic Regression" else dt_model
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1]
 
-    if prediction == 0:
-        st.markdown(f"""
-        <div class="result risk-low">
-            <div class="result-title">Low Risk</div>
-            <p class="result-text">
-                Machine operating normally.<br>
-                Failure probability: <b>{probability:.2f}</b>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.balloons()
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if prediction == 1:
+        st.error(
+            f"""
+            **High Risk**
+
+            Potential machine failure detected.  
+            Failure probability: **{probability:.2f}**
+
+            **Recommended Actions**
+            - Schedule preventive maintenance
+            - Inspect torque and tool wear
+            - Monitor temperature and RPM
+            """
+        )
     else:
-        st.markdown(f"""
-        <div class="result risk-high">
-            <div class="result-title">High Risk</div>
-            <p class="result-text">
-                Potential machine failure detected.<br>
-                Failure probability: <b>{probability:.2f}</b><br><br>
-                <b>Recommended Actions:</b><br>
-                • Schedule preventive maintenance<br>
-                • Inspect torque and tool wear<br>
-                • Monitor temperature and RPM
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.success(
+            f"""
+            **Low Risk**
+
+            Machine operating normally.  
+            Failure probability: **{probability:.2f}**
+            """
+        )
 
 # -------------------------------------------------
 # Footer
 # -------------------------------------------------
-st.markdown("""
-<div class="footer">
-Educational ML system — not a replacement for professional maintenance diagnosis
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    "<div style='text-align:center; color:#64748b; font-size:0.8rem; margin-top:2rem;'>"
+    "Educational ML system — not a replacement for professional maintenance diagnosis"
+    "</div>",
+    unsafe_allow_html=True
+)
